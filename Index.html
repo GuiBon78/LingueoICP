@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lingueo — Analyse ICP & État des comptes B2B</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --navy:#0D2570;--blue:#1B41A8;--blue2:#3360D4;--blue-l:#8AA4ED;--blue-100:#DBE4FA;--blue-50:#EEF2FD;
+  --yellow:#FFCE00;--green:#21B574;--green-50:#D4F2E2;--coral:#FF6B5A;--coral-50:#FFE0DC;--violet:#6E5AE8;
+  --ink:#161B2E;--ink2:#3D4458;--ink3:#6B7287;--ink4:#B7BCCB;--line:#DDE1EB;--bg:#F5F7FB;--white:#fff;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px;}
+
+/* HEADER */
+header{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:36px 0 0;}
+.htop{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;}
+.logo{font-family:'Plus Jakarta Sans';font-weight:800;font-size:26px;letter-spacing:-.01em;}
+.logo span{color:var(--yellow);}
+.hmeta{font-family:'JetBrains Mono';font-size:12px;color:var(--blue-l);text-align:right;}
+h1{font-family:'Plus Jakarta Sans';font-weight:800;font-size:30px;margin:18px 0 6px;letter-spacing:-.02em;}
+.hsub{font-size:15px;color:var(--blue-100);max-width:720px;margin-bottom:24px;}
+/* TABS */
+.tabs{display:flex;gap:4px;flex-wrap:wrap;}
+.tab{background:rgba(255,255,255,.08);color:#fff;border:none;padding:13px 22px;border-radius:12px 12px 0 0;font-family:'Plus Jakarta Sans';font-weight:600;font-size:14.5px;cursor:pointer;transition:all .15s;}
+.tab:hover{background:rgba(255,255,255,.16);}
+.tab.on{background:var(--bg);color:var(--navy);}
+/* SECTIONS */
+.panel{display:none;padding:32px 0 64px;}
+.panel.on{display:block;}
+.kicker{font-family:'JetBrains Mono';font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);font-weight:500;margin-bottom:6px;}
+h2{font-family:'Plus Jakarta Sans';font-weight:700;font-size:22px;color:var(--navy);margin:8px 0 4px;letter-spacing:-.01em;}
+h3{font-family:'Plus Jakarta Sans';font-weight:700;font-size:16px;color:var(--navy);margin:6px 0;}
+.lead{font-size:14px;color:var(--ink3);margin-bottom:18px;max-width:760px;}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:18px;}
+.card-pad{padding:26px;}
+/* KPI */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px;}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;}
+.kpi .l{font-size:12px;color:var(--ink3);margin-bottom:4px;}
+.kpi .v{font-family:'Plus Jakarta Sans';font-weight:800;font-size:26px;color:var(--navy);line-height:1.1;}
+.kpi .s{font-size:11px;color:var(--ink4);margin-top:2px;}
+.kpi.accent{background:linear-gradient(135deg,var(--navy),var(--blue));border:none;}
+.kpi.accent .l{color:var(--blue-100);}.kpi.accent .v{color:var(--yellow);}.kpi.accent .s{color:var(--blue-l);}
+/* READING BUBBLE */
+.bubble{background:var(--blue-50);border-left:4px solid var(--blue2);border-radius:0 12px 12px 0;padding:14px 18px;margin:14px 0;font-size:13.5px;color:var(--ink2);}
+.bubble b{color:var(--navy);}
+.bubble .ex{display:inline-block;background:#fff;border:1px solid var(--blue-100);border-radius:6px;padding:1px 8px;margin:2px 3px 0 0;font-size:12px;font-family:'JetBrains Mono';color:var(--blue);}
+.bubble .champ{display:inline-block;background:var(--coral-50);border:1px solid #F5B5AE;border-radius:6px;padding:1px 8px;margin:2px 3px 0 0;font-size:12px;font-family:'JetBrains Mono';color:#A32D2D;}
+.chartbox{position:relative;width:100%;}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--ink3);margin:6px 0 10px;}
+.legend span{display:flex;align-items:center;gap:5px;}
+.dot{width:10px;height:10px;border-radius:3px;}
+/* PORTRAIT */
+.portrait{background:linear-gradient(135deg,var(--navy),#16307e);color:#fff;border-radius:18px;padding:30px 32px;margin-bottom:20px;}
+.portrait h2{color:#fff;}
+.portrait .big{font-size:18px;line-height:1.7;font-weight:500;margin:14px 0;}
+.portrait .big em{color:var(--yellow);font-style:normal;font-weight:700;}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+@media(max-width:720px){.pgrid{grid-template-columns:1fr;}}
+.pbox{background:rgba(255,255,255,.07);border-radius:12px;padding:14px 16px;}
+.pbox .t{font-family:'JetBrains Mono';font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue-l);margin-bottom:8px;}
+.pbox ul{list-style:none;font-size:13px;line-height:1.9;}
+.pbox li::before{content:"▸ ";color:var(--yellow);}
+.pbox.danger .t{color:#FFB3A8;}.pbox.danger li::before{content:"✕ ";color:var(--coral);}
+/* SUBSEG FICHE */
+.fiche{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:12px;}
+.fiche.hot{border-color:var(--yellow);box-shadow:0 0 0 1px var(--yellow) inset;}
+.fhead{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:8px;}
+.fname{font-family:'Plus Jakarta Sans';font-weight:700;font-size:15px;color:var(--navy);}
+.ftag{font-size:11px;font-family:'JetBrains Mono';background:var(--yellow);color:var(--navy);padding:2px 8px;border-radius:6px;font-weight:600;}
+.fstats{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:10px;}
+.fstat .n{font-family:'Plus Jakarta Sans';font-weight:800;font-size:20px;color:var(--blue);}
+.fstat .k{font-size:11px;color:var(--ink3);}
+.fclients{font-size:12.5px;color:var(--ink2);line-height:1.7;}
+.fclients b{color:var(--navy);font-weight:600;}
+.sechead{display:flex;align-items:center;gap:10px;font-family:'Plus Jakarta Sans';font-weight:700;font-size:17px;color:var(--navy);margin:22px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--yellow);}
+.sechead .badge{font-size:12px;font-family:'JetBrains Mono';color:var(--ink3);font-weight:400;margin-left:auto;}
+/* CALCULATOR */
+.calc{display:grid;grid-template-columns:320px 1fr;gap:22px;}
+@media(max-width:820px){.calc{grid-template-columns:1fr;}}
+.slider-row{margin-bottom:15px;}
+.slider-row .lbl{display:flex;justify-content:space-between;margin-bottom:5px;}
+.slider-row .lbl span:first-child{font-size:13px;color:var(--ink2);font-weight:500;}
+.slider-row .lbl span:last-child{font-family:'JetBrains Mono';font-size:13px;color:var(--blue);font-weight:500;}
+input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:3px;background:var(--line);outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--blue);cursor:pointer;border:3px solid #fff;box-shadow:0 1px 4px rgba(13,37,112,.3);}
+input[type=range].vol::-webkit-slider-thumb{background:var(--yellow);}
+.presets{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px;}
+.presets button{flex:1;min-width:80px;font-size:12px;font-weight:500;padding:8px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink2);cursor:pointer;}
+.presets button.on{background:var(--blue);color:#fff;border-color:var(--blue);}
+.rank{display:flex;flex-direction:column;gap:6px;}
+.bar{display:flex;align-items:center;gap:10px;}
+.bar .pos{flex:0 0 22px;text-align:right;font-family:'Plus Jakarta Sans';font-weight:700;font-size:13px;}
+.bar .track{flex:1;position:relative;height:34px;background:var(--bg);border:1px solid var(--line);border-radius:9px;overflow:hidden;}
+.bar .fill{position:absolute;top:0;left:0;height:100%;transition:width .35s;}
+.bar .content{position:relative;display:flex;align-items:center;height:100%;padding:0 10px;gap:7px;}
+.bar .nm{font-size:12.5px;font-weight:600;}
+.bar .mt{font-size:11px;color:var(--ink3);font-family:'JetBrains Mono';}
+.bar .wn{font-size:11px;color:var(--coral);font-weight:500;}
+.bar .sc{flex:0 0 36px;text-align:right;font-family:'JetBrains Mono';font-weight:500;font-size:13px;}
+.formula{background:var(--navy);color:#fff;border-radius:12px;padding:16px 18px;font-size:13px;line-height:1.8;margin-bottom:16px;}
+.formula code{font-family:'JetBrains Mono';background:rgba(255,255,255,.12);padding:1px 7px;border-radius:5px;color:var(--yellow);font-size:12px;}
+/* MARKETING */
+.mkcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px;}
+.pain{background:var(--coral-50);border-radius:10px;padding:12px 14px;font-size:13px;color:#7A2018;margin:8px 0;}
+.pain b{color:#5C160F;}
+.email{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:10px 0;font-size:12.5px;color:var(--ink2);}
+.email .obj{font-weight:700;color:var(--navy);margin-bottom:6px;font-size:13px;}
+.email .step{font-family:'JetBrains Mono';font-size:10px;color:var(--blue);text-transform:uppercase;letter-spacing:.08em;}
+.uc{border-left:3px solid var(--green);padding:10px 14px;margin:10px 0;background:#fff;font-size:13px;}
+.uc .uct{font-weight:700;color:var(--navy);}
+.uc .uci{color:var(--ink3);font-size:12px;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin:8px 0;}
+th{background:var(--navy);color:#fff;padding:9px 11px;text-align:left;font-weight:600;font-size:12px;}
+td{padding:8px 11px;border-bottom:1px solid var(--line);color:var(--ink2);}
+tr:nth-child(even) td{background:var(--blue-50);}
+.foot{text-align:center;font-family:'JetBrains Mono';font-size:11px;color:var(--ink4);padding:20px 0 40px;}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:720px){.split{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="htop">
+      <div class="logo">Lin<span>gueo</span></div>
+      <div class="hmeta">Analyse ICP &amp; état des comptes B2B<br>Données : janv. 2024 → 10 juin 2026<br>Périmètre B2B nommé · 6,05 M€ · 640 comptes</div>
+    </div>
+    <h1>Où se trouve le vrai marché de Lingueo ?</h1>
+    <p class="hsub">Synthèse complète : état des comptes gagnés, définition de l'ICP recentrée sur le volume reproductible, et kit marketing pour activer les 3 secteurs cibles.</p>
+    <div class="tabs">
+      <button class="tab on" data-t="t1">📊 Vue d'ensemble</button>
+      <button class="tab" data-t="t2">🎯 ICP &amp; secteurs cibles</button>
+      <button class="tab" data-t="t3">✉️ Kit marketing</button>
+    </div>
+  </div>
+</header>
+
+<!-- ============ ONGLET 1 : VUE D'ENSEMBLE ============ -->
+<div class="panel on" id="t1"><div class="wrap">
+  <div class="kicker">Onglet 1 · Tous les comptes</div>
+  <h2>Les insights clés sur l'ensemble du portefeuille</h2>
+  <p class="lead">Vue consolidée des 640 comptes B2B (groupes regroupés, B2C agrégé écarté). Le fil rouge : la valeur affichée par secteur est massivement portée par quelques comptes champions.</p>
+
+  <div class="kpis">
+    <div class="kpi"><div class="l">Comptes B2B</div><div class="v">640</div><div class="s">groupes consolidés</div></div>
+    <div class="kpi"><div class="l">CA gagné B2B</div><div class="v">6,05 M€</div><div class="s">hors 2,13 M€ non nommé</div></div>
+    <div class="kpi accent"><div class="l">Concentration</div><div class="v">67 %</div><div class="s">du CA sur 21 comptes (3 %)</div></div>
+    <div class="kpi"><div class="l">Réachat 24→25</div><div class="v">32 %</div><div class="s">churn de 68 %</div></div>
+    <div class="kpi"><div class="l">Panier médian</div><div class="v">~1,9 k€</div><div class="s">très petite traine</div></div>
+  </div>
+
+  <div class="card">
+    <h3>Répartition par valeur — la loi de Pareto</h3>
+    <div class="legend"><span><span class="dot" style="background:#1B41A8"></span>% des comptes</span><span><span class="dot" style="background:#BA7517"></span>% du CA</span></div>
+    <div class="chartbox" style="height:230px"><canvas id="c_val"></canvas></div>
+    <div class="bubble"><b>67 % des comptes (425) ne pèsent que 11 % du CA</b>, tandis que les 21 comptes à plus de 30 k€ (3 %) en captent 67 %. Exemples de gros comptes : <span class="ex">Air France</span><span class="ex">Decathlon</span><span class="ex">Jump Blue</span>. L'enjeu n'est pas d'empiler des micro-deals mais de faire monter le panier.</div>
+  </div>
+
+  <div class="split">
+    <div class="card">
+      <h3>Volume VS CA par type de compte</h3>
+      <div class="legend"><span><span class="dot" style="background:#1B41A8"></span>% volume</span><span><span class="dot" style="background:#BA7517"></span>% CA</span><span><span class="dot" style="background:#21B574"></span>panier (k€)</span></div>
+      <div class="chartbox" style="height:240px"><canvas id="c_type"></canvas></div>
+      <div class="bubble"><b>GC : 28 % des comptes, 59 % du CA</b> (panier 21,5 k€). Les <b>ETI sont le segment le plus faible</b> (5 % du CA) — ce qui rouvre le débat sur leur priorisation.</div>
+    </div>
+    <div class="card">
+      <h3>Churn 2024→2025 par taille</h3>
+      <div class="chartbox" style="height:240px"><canvas id="c_churn"></canvas></div>
+      <div class="bubble"><b>Plus le compte est petit, moins on le retient :</b> 44 % de churn sur les 10 000+ contre 72 % sur les PME 0-50. Le service managé est l'arme de rétention à déployer.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Comptes en plus forte évolution 2024 → 2025</h3>
+    <div class="split">
+      <div>
+        <h3 style="color:#085041;font-size:13px;">▲ Hausses</h3>
+        <table><tr><th>Compte</th><th>Δ CA</th></tr>
+        <tr><td>ADDEXPERT MDT</td><td><b>+102 k€</b></td></tr>
+        <tr><td>France Travail (groupe)</td><td>+57 k€</td></tr>
+        <tr><td>Albert School</td><td>+42 k€</td></tr>
+        <tr><td>Equans</td><td>+36 k€</td></tr>
+        <tr><td>Vinci (groupe)</td><td>+31 k€</td></tr></table>
+      </div>
+      <div>
+        <h3 style="color:#791F1F;font-size:13px;">▼ Baisses</h3>
+        <table><tr><th>Compte</th><th>Δ CA</th></tr>
+        <tr><td>Air France</td><td><b>−267 k€</b></td></tr>
+        <tr><td>Decathlon (groupe)</td><td>−111 k€</td></tr>
+        <tr><td>Jump Blue</td><td>−86 k€</td></tr>
+        <tr><td>Euro Disney (groupe)</td><td>−34 k€</td></tr>
+        <tr><td>OpenClassrooms</td><td>−26 k€</td></tr></table>
+      </div>
+    </div>
+    <div class="bubble">Les hausses sont des comptes neufs/en expansion ; <b>les baisses sont les champions qui s'érodent</b>. Un socle reposant sur 3 comptes qui baissent simultanément = risque systémique.</div>
+  </div>
+</div></div>
+
+<!-- ============ ONGLET 2 : ICP ============ -->
+<div class="panel" id="t2"><div class="wrap">
+  <div class="kicker">Onglet 2 · Profil de client idéal</div>
+
+  <div class="portrait">
+    <h2>🎯 Portrait-robot du client Lingueo</h2>
+    <p class="big">L'ICP reproductible de Lingueo est une <em>PME ou petite ETI de 20 à 200 salariés</em>, autonome (non filiale d'un grand groupe), dans l'un des trois secteurs réellement porteurs : <em>finance &amp; gestion d'actifs, informatique &amp; télécom, ou services aux entreprises / RH</em>. Elle a un besoin d'anglais <em>opérationnel et métier</em> lié à une activité internationale, entre par un programme de formation à panier modéré (3–6 k€), avec un potentiel de montée en gamme.</p>
+    <div class="pgrid">
+      <div class="pbox"><div class="t">Critères de qualification</div><ul>
+        <li>Activité ou clients internationaux</li>
+        <li>Équipes front-office exposées à l'anglais</li>
+        <li>Interlocuteur L&amp;D / Formation identifié</li>
+        <li>Structure indépendante</li>
+      </ul></div>
+      <div class="pbox danger"><div class="t">Signaux d'exclusion</div><ul>
+        <li>Filiale d'un grand groupe (compte champion)</li>
+        <li>Besoin "culture d'entreprise" sans lien au poste</li>
+        <li>Effectif &lt; 20 (volume insuffisant)</li>
+        <li>One-shot sans logique de réachat</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Le secteur porteur = CA net, une fois le champion retiré</h3>
+    <p class="lead" style="margin-bottom:10px">Trier par CA brut fausse tout. En retirant le plus gros compte de chaque secteur, le vrai potentiel reproductible apparaît.</p>
+    <div class="legend"><span><span class="dot" style="background:#21B574"></span>CA net (reproductible)</span><span><span class="dot" style="background:#D7DCE5"></span>CA du champion (retiré)</span></div>
+    <div class="chartbox" style="height:430px"><canvas id="c_net"></canvas></div>
+    <div class="bubble"><b>IT-télécom est le plus sain</b> : son champion <span class="champ">Konectiv 34k</span> ne pèse presque rien, tout est dupliquable. Exemples reproductibles : <span class="ex">Nameshield</span><span class="ex">Zenika</span><span class="ex">B2PWeb</span>. À l'inverse la logistique s'effondre : <span class="champ">Air France 1,85M</span> retirée, il ne reste que 129 k€.</div>
+  </div>
+
+  <div class="card card-pad">
+    <h3>🧮 Comment se calcule le scoring ICP</h3>
+    <div class="formula">
+      Score ICP = <code>40% × Nombre de comptes</code> + <code>20% × Densité</code> + <code>20% × Indépendance au champion</code> + <code>20% × Profondeur</code><br>
+      <span style="font-size:12px;color:#cdd8f5">Le <b style="color:#FFCE00">volume</b> pilote le score (logique de reproductibilité). La <b>valeur actuelle n'entre pas</b> : elle est traitée comme un plancher à dépasser. Densité = nb de comptes ≥ 3k€ · Indépendance = 1 − part du champion · Profondeur = réachat médian.</span>
+    </div>
+    <p class="lead" style="margin-bottom:14px">Ajustez les curseurs : le classement se recompose en direct. Le ⚠ marque les secteurs champion-dépendants.</p>
+    <div class="calc">
+      <div>
+        <div id="sliders"></div>
+        <div class="presets">
+          <button data-p="vol" class="on">Priorité volume</button>
+          <button data-p="val">Priorité valeur</button>
+          <button data-p="eq">Équilibré</button>
+        </div>
+      </div>
+      <div class="rank" id="rank"></div>
+    </div>
+  </div>
+
+  <h2 style="margin-top:30px">Focus : les 3 secteurs cibles et leurs sous-segments</h2>
+  <p class="lead">Chaque sous-segment a sa fiche d'identité : poids CA, panier moyen, nombre de clients et comptes principaux. ★ = cible prioritaire.</p>
+  <div id="subsegs"></div>
+</div></div>
+
+<!-- ============ ONGLET 3 : MARKETING ============ -->
+<div class="panel" id="t3"><div class="wrap">
+  <div class="kicker">Onglet 3 · Activation commerciale</div>
+  <h2>Kit marketing : pains, use cases & campagnes</h2>
+  <p class="lead">De quoi équiper les équipes outbound. Principe directeur : on vend la <b>formation</b> (Coach) en produit principal, le test (FlashLevel) n'est qu'une étape de l'argumentaire.</p>
+
+  <div class="mkcard">
+    <h3>🎯 Les pains par secteur</h3>
+    <div class="pain"><b>IT / ESN :</b> on staffe les consultants sur un niveau d'anglais <b>déclaré (CV), jamais mesuré</b> — le client le découvre en COPIL et la mission internationale dérape.</div>
+    <div class="pain"><b>Finance / Gestion d'actifs :</b> une formulation imprécise en anglais face à un <b>investisseur international ou en comité</b> se paie cher — mais l'anglais général ne suffit pas, il faut le vocabulaire deal.</div>
+    <div class="pain"><b>Services / RH :</b> la formation langues existe mais l'<b>assiduité s'effondre</b> et le niveau ne bouge pas ; impossible de prouver le ROI du budget formation.</div>
+  </div>
+
+  <div class="mkcard">
+    <h3>💡 Use cases impact (extraits)</h3>
+    <div class="uc"><div class="uct">ESN — Staffer plus vite à l'international</div><div class="uci">FlashLevel évalue le niveau réel (30 min) → Coach entraîne sur le COPIL client → LILATE certifie. Réf. Zenika, Helpline.</div></div>
+    <div class="uc"><div class="uct">Fonds / PE — Opérer des deals sans accroc</div><div class="uci">COL dédié (vocabulaire financier, comité, reporting LP), cours visio dans des agendas tendus. Réf. Vauban Infra, RAISE, Isai.</div></div>
+    <div class="uc"><div class="uct">RH / Coaching — Brique langues mesurable</div><div class="uci">Chaîne complète en marque partenaire : Évaluer → Former → Certifier (reconnue par l'État). Réf. Swile, Simundia.</div></div>
+    <p style="font-size:12px;color:var(--ink4);margin-top:8px">Document complet : 9 use cases impact (3 par secteur) généré en .docx.</p>
+  </div>
+
+  <div class="mkcard">
+    <h3>✉️ Campagne A — FORMATION (principale) · persona L&amp;D / Formation</h3>
+    <p style="font-size:12.5px;color:var(--ink3);margin-bottom:6px">Le test n'apparaît qu'en email 2, comme étape de diagnostic. CTA soft (question fermée).</p>
+    <div class="email"><span class="step">Email 1 · douleur</span><div class="obj">Objet : monter le niveau d'anglais de vos consultants, pour de vrai</div>La formation langues existe sur le papier, mais l'assiduité s'effondre et le niveau ne bouge pas. Comment mesurez-vous le retour réel de votre budget formation langues ?</div>
+    <div class="email"><span class="step">Email 2 · méthode + test comme étape</span><div class="obj">Re: monter le niveau d'anglais de vos consultants</div>Cours individuels visio sur le contexte réel (COPIL, points d'avancement), coach dédié. Le parcours démarre par un diagnostic 30 min, piloté sur 22 critères — ≈ ½ niveau CECRL / 25h. Zenika, Helpline nous font confiance. Échange de 15 min ?</div>
+    <div class="email"><span class="step">Email 3 · compétence certifiée</span><div class="obj">Objet : une compétence certifiée, pas juste des heures</div>On certifie via LILATE, reconnue par l'État. Côté L&amp;D : reporting fin (Qualiopi, service managé) qui justifie l'investissement.</div>
+    <div class="email"><span class="step">Email 4 · break-up</span><div class="obj">Objet : je referme le dossier {{entreprise}}</div>Sans retour je n'insiste pas. Mon lien reste ouvert si le sujet revient.</div>
+  </div>
+
+  <div class="mkcard">
+    <h3>✉️ Campagne B — TEST (accessoire) · persona Recrutement / TA</h3>
+    <p style="font-size:12.5px;color:var(--ink3);margin-bottom:6px">Réservée aux comptes avec signal recrutement (offres exigeant un niveau d'anglais). FlashLevel = produit, formation = rebond.</p>
+    <div class="email"><span class="step">Email 1 · douleur recrutement</span><div class="obj">Objet : « anglais courant » sur le CV : vraiment ?</div>Vos candidats cochent « bilingue », et en mission le client découvre l'écart. Comment objectivez-vous le niveau réel avant de présenter un profil ?</div>
+    <div class="email"><span class="step">Email 2 · FlashLevel + rebond formation</span><div class="obj">Re: « anglais courant »</div>FlashLevel mesure le niveau oral réel (30 min, ≈ 40 €). Et un bon profil juste sous le seuil, on le forme plutôt que de l'écarter — vous ne perdez pas le candidat.</div>
+  </div>
+
+  <div class="mkcard">
+    <h3>🔬 A/B testing par campagne</h3>
+    <table>
+      <tr><th>Campagne</th><th>Variante A</th><th>Variante B</th><th>Hypothèse</th></tr>
+      <tr><td>A — Formation</td><td>Objet "pour de vrai" (ROI)</td><td>"prêts à staffer ?" (delivery)</td><td>ROI-L&amp;D vs opérationnel</td></tr>
+      <tr><td>A — Formation</td><td>CTA question fermée</td><td>CTA 2 créneaux proposés</td><td>Question vs créneaux</td></tr>
+      <tr><td>B — Test</td><td>Angle crédibilité cabinet</td><td>Angle sécuriser shortlist</td><td>Quelle peur convertit</td></tr>
+      <tr><td>B — Test</td><td>Avec rebond formation</td><td>Sans rebond (test pur)</td><td>Le rebond aide ou dilue ?</td></tr>
+    </table>
+    <p style="font-size:12px;color:var(--ink4);margin-top:8px">Règle : 50/50, min. 100 envois/variante, on juge au <b>reply rate</b>, on garde la gagnante, on teste la variable suivante.</p>
+  </div>
+</div></div>
+
+<div class="foot">Lingueo · Analyse ICP confidentielle · générée juin 2026 · source Salesforce opportunités gagnées 2024–2026</div>
+
+<script>
+// ---------- TABS ----------
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); document.getElementById(b.dataset.t).classList.add('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+// ---------- CHARTS ----------
+const GRID={color:'rgba(128,128,128,0.1)'};
+new Chart(document.getElementById('c_val'),{type:'bar',
+  data:{labels:['< 3 k€','3-10 k€','10-30 k€','> 30 k€'],datasets:[
+    {label:'% comptes',data:[67,24,6,3],backgroundColor:'#1B41A8'},
+    {label:'% CA',data:[11,12,10,67],backgroundColor:'#BA7517'}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{max:70,grid:GRID},x:{grid:{display:false}}}}});
+
+new Chart(document.getElementById('c_type'),{type:'bar',
+  data:{labels:['GC','PME','TPE','ETI'],datasets:[
+    {label:'% volume',data:[28,38,22,12],backgroundColor:'#1B41A8',yAxisID:'y'},
+    {label:'% CA',data:[59,21,15,5],backgroundColor:'#BA7517',yAxisID:'y'},
+    {label:'panier k€',data:[21.5,5.6,7.1,3.9],backgroundColor:'#21B574',yAxisID:'y1'}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{y:{position:'left',grid:GRID},y1:{position:'right',grid:{display:false}},x:{grid:{display:false}}}}});
+
+new Chart(document.getElementById('c_churn'),{type:'bar',
+  data:{labels:['10001+','5-10k','1-5k','51-200','501-1k','201-500','0-50'],datasets:[
+    {data:[44,55,62,62,64,67,72],backgroundColor:['#21B574','#7FBA9B','#C9A227','#D98C30','#D9722F','#C74F2A','#A32D2D']}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{max:100,grid:GRID},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
+
+new Chart(document.getElementById('c_net'),{type:'bar',
+  data:{labels:['Finance, banque & assurance','Informatique & télécom','Gestion admin. & RH','Logistique & transport','Santé','Communication & marketing','Commerce & distribution','Énergie','Industries','Industrie - textile'],
+    datasets:[
+      {label:'CA net',data:[216,193,148,129,112,104,85,83,73,65],backgroundColor:['#21B574','#21B574','#21B574','#9FCDB8','#9FCDB8','#9FCDB8','#9FCDB8','#9FCDB8','#9FCDB8','#9FCDB8'],stack:'s'},
+      {label:'champion',data:[427,34,105,1849,42,69,422,81,31,38],backgroundColor:'#D7DCE5',stack:'s'}]},
+  options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:(c)=>c.dataset.label+': '+c.parsed.x+' k€'}}},
+    scales:{x:{stacked:true,max:700,grid:GRID,title:{display:true,text:'k€'}},y:{stacked:true,grid:{display:false},ticks:{font:{size:11}}}}}});
+
+// ---------- CALCULATOR ----------
+const S=[{"seg":"Informatique & télécom","nb":61,"nsig":22,"conc":0.149,"champ":"Konectiv","n_nb":1.0,"n_val":0.234,"n_dens":1.0,"n_nochamp":0.98,"n_prof":0.0},
+{"seg":"Gestion admin. & RH","nb":49,"nsig":18,"conc":0.415,"champ":"ADDEXPERT","n_nb":0.764,"n_val":0.21,"n_dens":0.789,"n_nochamp":0.648,"n_prof":0.0},
+{"seg":"Finance, banque & assurance","nb":50,"nsig":22,"conc":0.664,"champ":"Jump Blue","n_nb":0.78,"n_val":0.501,"n_dens":1.0,"n_nochamp":0.338,"n_prof":0.0},
+{"seg":"Santé","nb":31,"nsig":11,"conc":0.272,"champ":"Hologic","n_nb":0.4,"n_val":0.374,"n_dens":0.421,"n_nochamp":0.827,"n_prof":0.0},
+{"seg":"Logistique & transport","nb":39,"nsig":14,"conc":0.935,"champ":"Air France","n_nb":0.545,"n_val":0.306,"n_dens":0.579,"n_nochamp":0.0,"n_prof":0.0},
+{"seg":"Communication & marketing","nb":27,"nsig":9,"conc":0.398,"champ":"Adikteev","n_nb":0.327,"n_val":0.428,"n_dens":0.316,"n_nochamp":0.67,"n_prof":0.0},
+{"seg":"Commerce & distribution","nb":35,"nsig":13,"conc":0.831,"champ":"Decathlon","n_nb":0.49,"n_val":1.0,"n_dens":0.526,"n_nochamp":0.169,"n_prof":0.0},
+{"seg":"Énergie","nb":19,"nsig":11,"conc":0.495,"champ":"Qair","n_nb":0.2,"n_val":0.769,"n_dens":0.421,"n_nochamp":0.505,"n_prof":1.0},
+{"seg":"Industries","nb":20,"nsig":8,"conc":0.297,"champ":"Fuchs","n_nb":0.218,"n_val":0.394,"n_dens":0.263,"n_nochamp":0.703,"n_prof":0.0},
+{"seg":"Industrie - textile","nb":17,"nsig":5,"conc":0.372,"champ":"COFEL","n_nb":0.164,"n_val":0.347,"n_dens":0.105,"n_nochamp":0.628,"n_prof":0.0},
+{"seg":"Service public & défense","nb":19,"nsig":8,"conc":0.791,"champ":"France Travail","n_nb":0.2,"n_val":0.197,"n_dens":0.263,"n_nochamp":0.209,"n_prof":0.0},
+{"seg":"Enseignement","nb":11,"nsig":3,"conc":0.842,"champ":"Albert School","n_nb":0.055,"n_val":0.32,"n_dens":0.0,"n_nochamp":0.158,"n_prof":0.0}];
+const dims=[{key:'nb',label:'Nombre de comptes',def:40,vol:true},{key:'val',label:'Valeur (panier net)',def:0},{key:'dens',label:'Densité (≥3k€)',def:20},{key:'nochamp',label:'Indépendance champion',def:20},{key:'prof',label:'Profondeur / réachat',def:20}];
+const presets={vol:{nb:50,val:0,dens:20,nochamp:20,prof:10},val:{nb:15,val:45,dens:15,nochamp:15,prof:10},eq:{nb:20,val:20,dens:20,nochamp:20,prof:20}};
+const W={};dims.forEach(d=>W[d.key]=d.def);
+const sd=document.getElementById('sliders');
+dims.forEach(d=>{const r=document.createElement('div');r.className='slider-row';
+  r.innerHTML=`<div class="lbl"><span>${d.label}</span><span id="o_${d.key}">${d.def}%</span></div><input type="range" class="${d.vol?'vol':''}" min="0" max="60" step="5" value="${d.def}" id="s_${d.key}">`;
+  sd.appendChild(r);r.querySelector('input').oninput=e=>{W[d.key]=+e.target.value;document.getElementById('o_'+d.key).textContent=W[d.key]+'%';document.querySelectorAll('.presets button').forEach(x=>x.classList.remove('on'));render();};});
+document.querySelectorAll('.presets button').forEach(b=>b.onclick=()=>{const p=presets[b.dataset.p];dims.forEach(d=>{W[d.key]=p[d.key];document.getElementById('s_'+d.key).value=p[d.key];document.getElementById('o_'+d.key).textContent=p[d.key]+'%';});document.querySelectorAll('.presets button').forEach(x=>x.classList.remove('on'));b.classList.add('on');render();});
+function render(){const tot=Object.values(W).reduce((a,b)=>a+b,0)||1;
+  const sc=S.map(s=>({...s,score:(W.nb*s.n_nb+W.val*s.n_val+W.dens*s.n_dens+W.nochamp*s.n_nochamp+W.prof*s.n_prof)/tot*100})).sort((a,b)=>b.score-a.score);
+  const mx=sc[0].score||1;const d=document.getElementById('rank');d.innerHTML='';
+  sc.forEach((s,i)=>{const w=Math.round(s.score/mx*100);const col=i===0?'#21B574':i===1?'#3360D4':i===2?'#FFCE00':'#B7BCCB';
+    const fc=i===0?'rgba(33,181,116,.16)':i===1?'rgba(51,96,212,.14)':i===2?'rgba(255,206,0,.18)':'rgba(183,188,203,.16)';
+    const tg=s.conc>0.6?`<span class="wn">⚠ ${Math.round(s.conc*100)}% = ${s.champ}</span>`:`<span class="mt">${s.nb} comptes</span>`;
+    const r=document.createElement('div');r.className='bar';
+    r.innerHTML=`<span class="pos" style="color:${col}">${i+1}</span><div class="track"><div class="fill" style="width:${w}%;background:${fc}"></div><div class="content"><span class="nm">${s.seg}</span>${tg}</div></div><span class="sc">${Math.round(s.score)}</span>`;
+    d.appendChild(r);});}
+render();
+
+// ---------- SUBSEGMENTS ----------
+const SUB={
+"🥇 Informatique & Télécom":{badge:"61 clients · 227 k€ · score 80",items:[
+  {n:"Infra / Télécom",c:8,ca:"83 k€",p:"10,4 k€",hot:false,cl:"<b>Konectiv</b> (34k), <b>Nameshield</b> (15k), B2PWeb (13k), Altitude Infra (11k), Keyyo–Bouygues (4k)"},
+  {n:"Éditeurs / SaaS",c:6,ca:"39 k€",p:"6,4 k€",hot:false,cl:"<b>MYM</b> (10k), Clarteis (8k), Cogetiq (7k), Armis Tech (6k), SaaS Group (4k), BMC (3k)"},
+  {n:"ESN / Conseil IT ★ cible outbound",c:5,ca:"29 k€",p:"5,8 k€",hot:true,cl:"<b>Zenika</b> (13k), HSO Enterprise (6k), Codilog (5k), Helpline (4k)"},
+  {n:"Autres IT (diffus)",c:42,ca:"76 k€",p:"1,8 k€",hot:false,cl:"Metrologic (6k), HarfangLab (4k), TFP (4k), Idemia (3k), Winamax (3k)…"}]},
+"🥈 Finance, banque & assurance":{badge:"50 clients · 643 k€",items:[
+  {n:"Fonds / Gestion d'actifs ★ micro-ICP en or",c:21,ca:"144 k€",p:"6,9 k€",hot:true,cl:"<b>Isai Gestion</b> (30k), <b>Vauban Infra</b> (28k), Meridiam (12k), RAISE (11k), Montefiore (10k), Eiffel (7k)…"},
+  {n:"Banque / Assurance",c:12,ca:"31 k€",p:"2,6 k€",hot:false,cl:"Société Générale (9k), Caisse des Dépôts (4k), Friday Insurance (3k), Crédit Agricole BP (3k)…"},
+  {n:"Autres finance (dont champion)",c:17,ca:"468 k€",p:"27,5 k€",hot:false,cl:"<b>Jump Blue</b> (427k ⚠), Gan Patrimoine (4k), Sompo (3k), SCOR (3k)…"}]},
+"🥉 Services aux entreprises & RH":{badge:"49 clients · 252 k€",items:[
+  {n:"Conseil & services RH",c:39,ca:"198 k€",p:"5,1 k€",hot:false,cl:"<b>ADDEXPERT MDT</b> (105k ⚠), Armatis (14k), Develop'Invest/Shell (8k), KPC (6k), Meotec (5k)…"},
+  {n:"HR-Tech / Coaching ★ panier le + élevé",c:4,ca:"34 k€",p:"8,4 k€",hot:true,cl:"<b>Swile</b> (12k), <b>Simundia</b> (12k), Caelops (5k), Pleyce (4k)"},
+  {n:"Conseil RH / Recrutement ★ cible campagne B",c:6,ca:"21 k€",p:"3,4 k€",hot:true,cl:"LHH Altedia (5k), Arthur Hunt (4k), Stanton Wallace (4k), FED (4k), Adsearch (2k)…"}]}};
+const ss=document.getElementById('subsegs');
+Object.entries(SUB).forEach(([sec,d])=>{
+  const h=document.createElement('div');h.className='sechead';h.innerHTML=`${sec}<span class="badge">${d.badge}</span>`;ss.appendChild(h);
+  d.items.forEach(it=>{const f=document.createElement('div');f.className='fiche'+(it.hot?' hot':'');
+    const tag=it.hot?'<span class="ftag">★ PRIORITAIRE</span>':'';
+    f.innerHTML=`<div class="fhead"><span class="fname">${it.n}</span>${tag}</div>
+      <div class="fstats"><div class="fstat"><div class="n">${it.c}</div><div class="k">clients</div></div><div class="fstat"><div class="n">${it.ca}</div><div class="k">poids CA</div></div><div class="fstat"><div class="n">${it.p}</div><div class="k">panier moyen</div></div></div>
+      <div class="fclients">${it.cl}</div>`;
+    ss.appendChild(f);});
+});
+</script>
+</body>
+</html>
